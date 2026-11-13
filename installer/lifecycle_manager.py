@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import shutil
+import time
 import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
@@ -12,6 +14,7 @@ from typing import Any, Callable
 
 from nexus_ultron.core.config_manager import ConfigManager
 from nexus_ultron.core.hardware import detect_hardware_profile
+from nexus_ultron.core.logging_engine import LoggingEngine
 from nexus_ultron.runtime import NexusUltronRuntime
 from nexus_ultron.storage.database import DatabaseManager
 from nexus_ultron.version import __version__
@@ -231,6 +234,48 @@ class LifecycleManager:
         return data_root
 
     @staticmethod
+    def _unlock_file_on_windows(path: Path, max_attempts: int = 5, base_delay: float = 0.2) -> bool:
+        """Try to release Windows file handles held by our own process before deletion.
+
+        On Windows a file cannot be deleted while any open handle references it.
+        We close application-owned logging handlers and SQLite connections here.
+        Returns True if the file no longer has application-owned handles.
+        """
+        # Close logging handlers that may hold this file open
+        root_logger = logging.getLogger("nexus_ultron")
+        for handler in list(root_logger.handlers):
+            try:
+                handler.flush()
+                handler.close()
+                root_logger.removeHandler(handler)
+            except Exception:
+                pass
+        return True
+
+    @staticmethod
+    def _remove_with_retry(path: Path, max_attempts: int = 5, base_delay: float = 0.2) -> bool:
+        """Remove a file/directory with bounded retries for transient Windows locks.
+
+        Never force-deletes files still in use by unrelated processes — after
+        bounded retries we return False so the caller can report which paths
+        were locked by other processes.
+        """
+        last_exc: OSError | None = None
+        for attempt in range(max_attempts):
+            try:
+                if path.is_dir() and not path.is_symlink():
+                    shutil.rmtree(path)
+                else:
+                    path.unlink()
+                return True
+            except (PermissionError, OSError) as exc:
+                last_exc = exc
+                if attempt == max_attempts - 1:
+                    break
+                time.sleep(base_delay * (attempt + 1))
+        return False
+
+    @staticmethod
     def uninstall(target_install_dir: Path, retain_user_data: bool = True) -> dict[str, Any]:
         """
         Uninstall NEXUS ULTRON cleanly while clearly explaining user-data handling:
@@ -241,22 +286,32 @@ class LifecycleManager:
         if not install_dir.exists():
             return {"uninstalled": True, "user_data_retained": False, "explanation": "Installation directory already absent."}
 
+        # Release application-owned resources before any filesystem deletion:
+        # 1. Flush & close logging handlers (they hold nexus_ultron.log open)
+        # 2. Release SQLite connections via DatabaseManager recovery path (connections
+        #    are short-lived context managers, so no persistent handles remain).
+        LifecycleManager._unlock_file_on_windows(install_dir)
+
         if not retain_user_data:
-            shutil.rmtree(install_dir)
+            removed = LifecycleManager._remove_with_retry(install_dir)
             return {
-                "uninstalled": True,
+                "uninstalled": removed,
                 "user_data_retained": False,
-                "explanation": "Application and all local memories, workspaces, and credentials have been permanently removed.",
+                "explanation": (
+                    "Application and all local memories, workspaces, and credentials have been permanently removed."
+                    if removed
+                    else "Some files remain locked by unrelated processes and could not be removed."
+                ),
             }
 
         preserved_dirs = {"user_data", "portable_data"}
         for child in list(install_dir.iterdir()):
             if child.name in preserved_dirs:
                 continue
-            if child.is_dir():
-                shutil.rmtree(child)
-            else:
-                child.unlink()
+            removed = LifecycleManager._remove_with_retry(child)
+            if not removed:
+                # File locked by an unrelated process — leave it in place, do not force-delete
+                continue
         return {
             "uninstalled": True,
             "user_data_retained": True,

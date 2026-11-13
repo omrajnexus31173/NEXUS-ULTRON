@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sqlite3
 from pathlib import Path
 
 from installer.lifecycle_manager import LifecycleManager
@@ -109,3 +110,56 @@ def test_30_complete_uninstallation_retain_and_remove_options(tmp_path: Path, re
     res_wipe = lm.uninstall(dir_wipe, retain_user_data=False)
     assert res_wipe["uninstalled"] is True and res_wipe["user_data_retained"] is False
     assert not dir_wipe.exists()
+
+
+def test_database_corruption_recovery_with_active_connections(tmp_path: Path, repo_root: Path) -> None:
+    """Windows regression: _initialize_or_recover() must close active connections/cursors,
+    checkpoint WAL, handle -wal/-shm sidecars, preserve corrupted DB as timestamped backup,
+    recreate database and reapply migrations — without silently deleting user data."""
+    db_path = tmp_path / "active_conn_test.db"
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # 1. Create a valid database with user data
+    db1 = DatabaseManager(db_path, repo_root / "migrations")
+    db1.execute(
+        "INSERT INTO memory_entries (id, namespace, title, content, tags_json, embedding_json, importance, created_at, updated_at) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        ("mem-1", "long_term", "Important Rule", "Never mix payment flows", "[]", "[]", 5, "2024-01-01T00:00:00Z", "2024-01-01T00:00:00Z"),
+    )
+    assert db1.recovered_from_corruption is False
+
+    # 2. Hold an active connection (simulating a leaked cursor/connection on Windows)
+    active_conn = sqlite3.connect(str(db_path))
+    active_conn.execute("CREATE TABLE IF NOT EXISTS active_table (id INTEGER PRIMARY KEY)")
+    active_conn.execute("INSERT INTO active_table (id) VALUES (1)")
+    # Intentionally NOT closing active_conn — simulates a connection left open
+
+    # 3. Corrupt the database file externally
+    db_path.write_bytes(b"NOT_A_VALID_SQLITE_FILE_CORRUPTED_BYTES" * 100)
+
+    # 4. Create WAL/SHM sidecar files to verify they are handled alongside the main DB
+    (db_path.parent / (db_path.name + "-wal")).write_bytes(b"wal-sidecar-data")
+    (db_path.parent / (db_path.name + "-shm")).write_bytes(b"shm-sidecar-data")
+
+    # 5. New DatabaseManager must recover: close connections, move corrupted files,
+    #    recreate clean DB, reapply migrations
+    recovered = DatabaseManager(db_path, repo_root / "migrations")
+    assert recovered.recovered_from_corruption is True
+
+    # 6. Corrupted DB preserved as timestamped backup (never silently deleted)
+    bak_files = list(tmp_path.glob("active_conn_test.db.corrupted.*.bak"))
+    assert len(bak_files) >= 1, "Corrupted DB must be preserved as timestamped backup"
+
+    # 7. WAL/SHM sidecars also backed up
+    sidecar_bak = list(tmp_path.glob("active_conn_test.db-*.corrupted.*.bak"))
+    assert len(sidecar_bak) >= 1, "WAL/SHM sidecars must be handled during recovery"
+
+    # 8. New database is functional with all migrations applied
+    tables = recovered.query_all("SELECT name FROM sqlite_master WHERE type='table'")
+    table_names = {r["name"] for r in tables}
+    assert "schema_migrations" in table_names
+    assert "memory_entries" in table_names
+    assert "permission_grants" in table_names
+
+    active_conn.close()
+    assert recovered.recovered_from_corruption is True

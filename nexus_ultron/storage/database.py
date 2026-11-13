@@ -6,6 +6,7 @@ import logging
 import shutil
 import sqlite3
 import threading
+import time
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
@@ -34,19 +35,68 @@ class DatabaseManager:
         conn.execute("PRAGMA synchronous = NORMAL;")
         return conn
 
+    @staticmethod
+    def _move_file_with_retry(src: Path, dst: Path, max_attempts: int = 5, base_delay: float = 0.2) -> None:
+        """Move a file with bounded retries for transient Windows file locks.
+
+        On Windows, a file cannot be moved while another process holds an open
+        handle to it.  We checkpoint WAL, close all connections, then retry the
+        move with short backoff so transient locks are released.
+        """
+        last_exc: OSError | None = None
+        for attempt in range(max_attempts):
+            try:
+                shutil.move(str(src), str(dst))
+                return
+            except (PermissionError, OSError) as exc:
+                last_exc = exc
+                if attempt == max_attempts - 1:
+                    break
+                time.sleep(base_delay * (attempt + 1))
+        if last_exc is not None:
+            raise last_exc
+
+
     def _initialize_or_recover(self) -> None:
         with self._lock:
             if self.db_path.exists() and self.db_path.stat().st_size > 0:
+                conn: sqlite3.Connection | None = None
                 try:
                     conn = self._connect()
+                    # Checkpoint WAL before any file operations so sidecar files
+                    # can be moved cleanly on Windows.
+                    try:
+                        conn.execute("PRAGMA wal_checkpoint(TRUNCATE);")
+                    except sqlite3.DatabaseError:
+                        pass  # WAL may not exist or be uncheckpointable
                     res = conn.execute("PRAGMA quick_check;").fetchone()
-                    conn.close()
                     if not res or res[0] != "ok":
                         raise sqlite3.DatabaseError(f"Integrity check failed: {res[0] if res else 'empty'}")
                 except sqlite3.DatabaseError as exc:
+                    # Always close the connection before touching filesystem
+                    if conn is not None:
+                        try:
+                            conn.close()
+                        except Exception:
+                            pass
+                        conn = None
+
                     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
                     corrupt_backup = self.db_path.with_name(f"{self.db_path.name}.corrupted.{ts}.bak")
-                    shutil.move(str(self.db_path), str(corrupt_backup))
+
+                    # Move the main database file with retries for Windows locks
+                    self._move_file_with_retry(self.db_path, corrupt_backup)
+
+                    # Move WAL and SHM sidecar files alongside the main DB
+                    for suffix in ("-wal", "-shm"):
+                        sidecar = self.db_path.with_name(self.db_path.name + suffix)
+                        if sidecar.exists():
+                            sidecar_bak = sidecar.with_name(f"{sidecar.name}.corrupted.{ts}.bak")
+                            try:
+                                self._move_file_with_retry(sidecar, sidecar_bak)
+                            except (PermissionError, OSError):
+                                pass  # Sidecar files are non-critical
+
                     logger.error(
                         "Corrupted SQLite database detected (%s). Quarantined to %s and reinitializing clean DB.",
                         exc,

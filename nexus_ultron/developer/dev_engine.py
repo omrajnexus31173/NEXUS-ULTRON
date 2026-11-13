@@ -376,13 +376,34 @@ class AutonomousDevEngine:
                 return {"verified": res.returncode == 0, "stdout": res.stdout, "stderr": res.stderr}
 
             if language in {"c", "cpp"}:
-                compiler = shutil.which("gcc" if language == "c" else "g++")
+                # Detect a C/C++ compiler: prefer GCC/Clang on Linux/macOS; on
+                # Windows prefer MSVC cl.exe (already installed with Visual Studio
+                # Build Tools) but fall back to gcc/g++ if a MinGW distribution is
+                # present on PATH.
+                compiler: list[str] | None = None
                 src_file = "main.c" if language == "c" else "main.cpp"
                 bin_name = "app_bin.exe" if sys.platform == "win32" else "./app_bin"
-                if not compiler:
-                    return {"verified": False, "stdout": "", "stderr": f"Compiler for {language} not installed"}
+
+                if sys.platform == "win32":
+                    cl_exe = shutil.which("cl.exe")
+                    gcc = shutil.which("gcc" if language == "c" else "g++")
+                    if cl_exe:
+                        compiler = [cl_exe, "/nologo", "/O2", "/Fe:app_bin.exe", src_file]
+                    elif gcc:
+                        compiler = [gcc, src_file, "-O2", "-o", "app_bin"]
+                    else:
+                        return {
+                            "verified": False,
+                            "stdout": "",
+                            "stderr": f"C/C++ compiler for {language} not installed (looked for cl.exe and gcc/g++)",
+                        }
+                else:
+                    compiler = [shutil.which("gcc" if language == "c" else "g++"), src_file, "-O2", "-o", "app_bin"]
+                    if not compiler[0]:
+                        return {"verified": False, "stdout": "", "stderr": f"Compiler for {language} not installed"}
+
                 comp = subprocess.run(
-                    [compiler, src_file, "-O2", "-o", "app_bin"],
+                    compiler,
                     cwd=str(project_dir),
                     capture_output=True,
                     text=True,
