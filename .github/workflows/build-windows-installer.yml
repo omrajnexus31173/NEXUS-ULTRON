@@ -72,6 +72,24 @@ jobs:
           # return non-zero exit codes and are not a valid success check.
           Get-Command ISCC.exe -ErrorAction Stop | Select-Object Name, Source, Version
 
+      - name: Validate PowerShell installer syntax
+        shell: pwsh
+        run: |
+          $errors = $null
+          $ast = [System.Management.Automation.Language.Parser]::ParseFile(
+            "installer/windows/NexusUltronSetup.ps1",
+            [ref] $null,
+            [ref] $errors
+          )
+          if ($errors -and $errors.Count -gt 0) {
+            Write-Host "PowerShell syntax errors found in NexusUltronSetup.ps1:" -ForegroundColor Red
+            foreach ($err in $errors) {
+              Write-Host ("  Line {0}: {1}" -f $err.Extent.StartLineNumber, $err.Message) -ForegroundColor Red
+            }
+            exit 1
+          }
+          Write-Host "PowerShell syntax validation passed." -ForegroundColor Green
+
       - name: Diagnostics before tests
         run: |
           python -c "import sys; print('Python:', sys.version)"
