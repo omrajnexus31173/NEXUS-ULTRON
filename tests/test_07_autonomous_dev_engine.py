@@ -60,3 +60,44 @@ def test_22_automated_self_debugging_with_pre_modify_backup(offline_runtime: Nex
     # Confirm pre-modification backup ZIP was created
     backups = list(offline_runtime.dev_engine.backups_root.glob("broken_python_app_backup_*.zip"))
     assert len(backups) >= 1
+
+
+def test_c_compiler_detection_and_compilation(offline_runtime: NexusUltronRuntime) -> None:
+    """Regression: C compiler discovery works and actual C code compiles + executes.
+
+    On Linux: gcc must be found. On Windows: cl.exe (MSVC) or gcc (MinGW) must be found.
+    Verifies the fix for [WinError 2] when no C compiler is configured on Windows CI.
+    """
+    import shutil
+    import sys
+
+    if sys.platform == "win32":
+        expected = shutil.which("cl.exe") or shutil.which("gcc")
+        assert expected is not None, "Windows CI must have cl.exe (MSVC) or gcc (MinGW) on PATH"
+    else:
+        expected = shutil.which("gcc")
+        assert expected is not None, "gcc must be installed for C compilation tests"
+
+    res = offline_runtime.dev_engine.build_application("Build native C verification utility", requested_language="c")
+    assert res["verified"] is True, f"C build failed: {res}"
+    assert "native binary self-test PASSED" in res["verification"]["test_output"]
+
+
+def test_cpp_compiler_detection_and_compilation(offline_runtime: NexusUltronRuntime) -> None:
+    """Regression: C++ compiler discovery works and actual C++ code compiles + executes.
+
+    On Linux: g++ must be found. On Windows: cl.exe (MSVC) or g++ (MinGW) must be found.
+    """
+    import shutil
+    import sys
+
+    if sys.platform == "win32":
+        expected = shutil.which("cl.exe") or shutil.which("g++")
+        assert expected is not None, "Windows CI must have cl.exe (MSVC) or g++ (MinGW) on PATH"
+    else:
+        expected = shutil.which("g++")
+        assert expected is not None, "g++ must be installed for C++ compilation tests"
+
+    res = offline_runtime.dev_engine.build_application("Build native C++ verification utility", requested_language="cpp")
+    assert res["verified"] is True, f"C++ build failed: {res}"
+    assert "native binary self-test PASSED" in res["verification"]["test_output"]

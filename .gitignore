@@ -11,6 +11,12 @@ __pycache__/
 venv/
 env/
 
+# Build artifacts
+*.egg-info/
+*.egg-info
+build/
+dist/
+
 # Local runtime state & sensitive user data (never commit user secrets)
 user_data/
 *.db-shm
