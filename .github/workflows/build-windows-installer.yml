@@ -72,6 +72,15 @@ jobs:
           # return non-zero exit codes and are not a valid success check.
           Get-Command ISCC.exe -ErrorAction Stop | Select-Object Name, Source, Version
 
+      - name: Diagnostics before tests
+        run: |
+          python -c "import sys; print('Python:', sys.version)"
+          python -c "import nexus_ultron; print('nexus_ultron OK')"
+          python -c "from nexus_ultron.storage.database import DatabaseManager; print('DatabaseManager OK')"
+          python -c "from installer.lifecycle_manager import LifecycleManager; print('LifecycleManager OK')"
+          python -c "from nexus_ultron.developer.dev_engine import AutonomousDevEngine; print('AutonomousDevEngine OK')"
+          python -c "import shutil; print('cl.exe:', shutil.which('cl.exe')); print('gcc:', shutil.which('gcc')); print('g++:', shutil.which('g++'))"
+
       - name: Run Full 30-Scenario Verification Suite on Windows
         env:
           QT_QPA_PLATFORM: offscreen
