@@ -99,7 +99,9 @@ jobs:
       - name: Verify PyInstaller EXE exists
         shell: pwsh
         run: |
-          $exePath = "releases/win64_exe/NEXUS-ULTRON.exe"
+          # PyInstaller one-directory build creates a folder with the EXE inside
+          $exeDir = "releases/win64_exe/NEXUS-ULTRON"
+          $exePath = Join-Path $exeDir "NEXUS-ULTRON.exe"
           if (-not (Test-Path $exePath)) {
             Write-Error "PyInstaller EXE not found at $exePath"
             exit 1
