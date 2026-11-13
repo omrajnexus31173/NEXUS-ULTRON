@@ -75,7 +75,15 @@ jobs:
       - name: Run Full 30-Scenario Verification Suite on Windows
         env:
           QT_QPA_PLATFORM: offscreen
-        run: pytest -v --tb=long
+        run: pytest -v --tb=long --junitxml=pytest_results.xml 2>&1 | tee pytest_output.txt; exit ${PIPESTATUS[0]}
+      - name: Upload pytest output on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-windows-output
+          path: |
+            pytest_output.txt
+            pytest_results.xml
 
       - name: Build Standalone NEXUS-ULTRON.exe via PyInstaller
         run: |
