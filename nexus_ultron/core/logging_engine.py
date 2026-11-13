@@ -111,7 +111,14 @@ class LoggingEngine:
     def _configure(self) -> None:
         root_logger = logging.getLogger("nexus_ultron")
         root_logger.setLevel(logging.INFO)
-        # Clear duplicate handlers when re-initializing in tests
+        # Close and remove existing handlers to release file handles
+        # (critical on Windows where open file handles block deletion)
+        for handler in list(root_logger.handlers):
+            try:
+                handler.flush()
+                handler.close()
+            except Exception:
+                pass
         root_logger.handlers.clear()
 
         redactor = SecretRedactionFilter()
