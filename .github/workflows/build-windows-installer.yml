@@ -26,6 +26,28 @@ jobs:
           pip install -r requirements-windows.txt
           pip install pytest pytest-asyncio
 
+      - name: Install MinGW-w64 C/C++ compiler toolchain
+        shell: pwsh
+        run: |
+          # Install MinGW-w64 via Chocolatey so gcc/g++ are available on Windows CI
+          $mingwCmd = Get-Command gcc -ErrorAction SilentlyContinue
+          if (-not $mingwCmd) {
+            Write-Host "gcc not found; installing MinGW-w64 via Chocolatey..."
+            choco install mingw --yes --no-progress
+          } else {
+            Write-Host "gcc already installed at $($mingwCmd.Source)"
+          }
+
+          # Add MinGW bin directory to GITHUB_PATH so gcc/g++ are found by
+          # subsequent steps (compiler detection in dev_engine.py).
+          $mingwPath = Get-Command gcc -ErrorAction Stop
+          $mingwDir = Split-Path -Parent $mingwPath.Source
+          echo "$mingwDir" >> $env:GITHUB_PATH
+
+          # Verify compiler toolchain
+          gcc --version
+          g++ --version
+
       - name: Install Inno Setup (idempotent)
         shell: pwsh
         run: |
