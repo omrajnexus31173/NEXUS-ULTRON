@@ -75,7 +75,7 @@ jobs:
       - name: Run Full 30-Scenario Verification Suite on Windows
         env:
           QT_QPA_PLATFORM: offscreen
-        run: pytest -v
+        run: pytest -v --tb=long
 
       - name: Build Standalone NEXUS-ULTRON.exe via PyInstaller
         run: |
