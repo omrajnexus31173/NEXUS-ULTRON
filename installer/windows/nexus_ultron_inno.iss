@@ -1,4 +1,4 @@
-; NEXUS ULTRON v3.0.0 — Inno Setup Windows 10 (64-bit) Installer Script
+; NEXUS ULTRON v3.0.0 - Inno Setup Windows 10 (64-bit) Installer Script
 [Setup]
 AppId={{8F9C4E12-3D51-49A1-9E42-NEXUSULTRONV3}
 AppName=NEXUS ULTRON
