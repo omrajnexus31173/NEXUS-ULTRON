@@ -26,23 +26,29 @@ jobs:
           pip install -r requirements-windows.txt
           pip install pytest pytest-asyncio
 
-      - name: Install Inno Setup
+      - name: Install Inno Setup (idempotent)
         shell: pwsh
         run: |
-          # Chocolatey is pre-installed on windows-latest GitHub Actions runners.
-          # jrsoftware.org/download.php/is.exe returns an HTML redirect page,
-          # not a direct PE executable, so direct download+execute fails with a
-          # corrupted-file error.
-          choco install innosetup --yes --no-progress
+          # Inno Setup is pre-installed on windows-latest GitHub Actions runners.
+          # Detect whether ISCC.exe already exists; only install via Chocolatey if missing.
+          $isccCmd = Get-Command ISCC.exe -ErrorAction SilentlyContinue
+          if (-not $isccCmd) {
+            Write-Host "ISCC.exe not found; installing Inno Setup via Chocolatey..."
+            choco install innosetup --yes --no-progress
+          } else {
+            Write-Host "ISCC.exe already installed at $($isccCmd.Source)"
+          }
 
-          # Verify ISCC.exe is available and add its directory to GITHUB_PATH
+          # Resolve the actual compiler path and add its directory to GITHUB_PATH
           # so subsequent steps (iscc installer compilation) can find it.
           $isccPath = Get-Command ISCC.exe -ErrorAction Stop
           $isccDir = Split-Path -Parent $isccPath.Source
           echo "$isccDir" >> $env:GITHUB_PATH
 
-          # Verify Inno Setup compiler works
-          ISCC.exe /?
+          # Verify compiler is available via Get-Command (exit code 0 when found).
+          # Do NOT use 'ISCC.exe /?' for verification — Windows help commands
+          # return non-zero exit codes and are not a valid success check.
+          Get-Command ISCC.exe -ErrorAction Stop | Select-Object Name, Source, Version
 
       - name: Run Full 30-Scenario Verification Suite on Windows
         env:
@@ -53,9 +59,39 @@ jobs:
         run: |
           pyinstaller installer/windows/pyinstaller_nexus_ultron.spec --distpath releases/win64_exe --workpath temp_pyi
 
+      - name: Verify PyInstaller EXE exists
+        shell: pwsh
+        run: |
+          $exePath = "releases/win64_exe/NEXUS-ULTRON.exe"
+          if (-not (Test-Path $exePath)) {
+            Write-Error "PyInstaller EXE not found at $exePath"
+            exit 1
+          }
+          $size = (Get-Item $exePath).Length
+          if ($size -eq 0) {
+            Write-Error "PyInstaller EXE at $exePath is empty (0 bytes)"
+            exit 1
+          }
+          Write-Host "PyInstaller EXE verified: $exePath ($size bytes)"
+
       - name: Compile One-Click Windows Setup.exe via Inno Setup
         run: |
           iscc installer/windows/nexus_ultron_inno.iss
+
+      - name: Verify Inno Setup installer exists
+        shell: pwsh
+        run: |
+          $installerPath = "releases/NEXUS-ULTRON-v3.0.0-Windows10-x64-Setup.exe"
+          if (-not (Test-Path $installerPath)) {
+            Write-Error "Inno Setup installer not found at $installerPath"
+            exit 1
+          }
+          $size = (Get-Item $installerPath).Length
+          if ($size -eq 0) {
+            Write-Error "Inno Setup installer at $installerPath is empty (0 bytes)"
+            exit 1
+          }
+          Write-Host "Inno Setup installer verified: $installerPath ($size bytes)"
 
       - name: Upload Windows Release Artifacts
         uses: actions/upload-artifact@v4
