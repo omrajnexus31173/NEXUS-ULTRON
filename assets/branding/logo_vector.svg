@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" width="1200" height="420">
+  <defs>
+    <linearGradient id="titaniumGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E6EDF3"/>
+      <stop offset="35%" stop-color="#B9C5D0"/>
+      <stop offset="68%" stop-color="#768696"/>
+      <stop offset="100%" stop-color="#C9D4DE"/>
+    </linearGradient>
+    <radialGradient id="aiCoreGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="42%" stop-color="#9BF1FF"/>
+      <stop offset="78%" stop-color="#00D9FF"/>
+      <stop offset="100%" stop-color="#00D9FF" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="cyanGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Neural Network Connections -->
+  <g stroke="#00D9FF" stroke-width="1.8" stroke-opacity="0.85" fill="none" filter="url(#cyanGlow)">
+    <line x1="190" y1="210" x2="112" y2="145"/>
+    <line x1="190" y1="210" x2="268" y2="145"/>
+    <line x1="190" y1="210" x2="112" y2="275"/>
+    <line x1="190" y1="210" x2="268" y2="275"/>
+    <line x1="190" y1="210" x2="190" y2="96"/>
+    <line x1="190" y1="210" x2="190" y2="324"/>
+    <polyline points="132,120 190,88 248,120"/>
+    <polyline points="132,300 190,332 248,300"/>
+    <polyline points="116,182 148,182 164,154"/>
+    <polyline points="264,238 232,238 216,266"/>
+  </g>
+  <g fill="#00D9FF" filter="url(#cyanGlow)">
+    <circle cx="190" cy="88" r="3.5"/>
+    <circle cx="190" cy="332" r="3.5"/>
+    <circle cx="112" cy="145" r="3.5"/>
+    <circle cx="268" cy="145" r="3.5"/>
+    <circle cx="112" cy="275" r="3.5"/>
+    <circle cx="268" cy="275" r="3.5"/>
+    <circle cx="164" cy="154" r="3"/>
+    <circle cx="216" cy="266" r="3"/>
+  </g>
+
+  <!-- Mechanical Titanium Geometric N Emblem -->
+  <g fill="url(#titaniumGrad)" stroke="#00D9FF" stroke-width="1.4">
+    <!-- Upper-Left Pillar -->
+    <polygon points="82,112 148,46 148,96 116,128 116,192 98,206 82,192"/>
+    <!-- Lower-Left Pillar -->
+    <polygon points="82,228 98,214 116,228 116,292 148,324 148,374 82,308"/>
+    <!-- Upper-Right Pillar -->
+    <polygon points="298,112 232,46 232,96 264,128 264,192 282,206 298,192"/>
+    <!-- Lower-Right Pillar -->
+    <polygon points="298,228 282,214 264,228 264,292 232,324 232,374 298,308"/>
+    <!-- Upper N Diagonal Interconnect -->
+    <polygon points="134,98 158,76 226,144 202,168"/>
+    <!-- Lower N Diagonal Interconnect -->
+    <polygon points="178,252 202,276 246,320 222,344 154,276"/>
+  </g>
+
+  <!-- Central AI Core -->
+  <circle cx="190" cy="210" r="44" fill="#0B1220" stroke="#B9C5D0" stroke-width="3"/>
+  <circle cx="190" cy="210" r="37" fill="url(#aiCoreGlow)" filter="url(#cyanGlow)"/>
+  <circle cx="190" cy="210" r="39" fill="none" stroke="#00D9FF" stroke-width="1.6"/>
+
+  <!-- Brand Typography -->
+  <text x="360" y="212"
+        font-family="'Orbitron', 'Rajdhani', 'Eurostile', 'Segoe UI', sans-serif"
+        font-size="74"
+        font-weight="800"
+        letter-spacing="8"
+        fill="#E6EDF3">NEXUS <tspan fill="#B9C5D0">ULTRON</tspan></text>
+
+  <text x="364" y="258"
+        font-family="'Rajdhani', 'Segoe UI', sans-serif"
+        font-size="20"
+        font-weight="600"
+        letter-spacing="11.5"
+        fill="#00D9FF">ONE MIND. INFINITE CAPABILITIES.</text>
+</svg>

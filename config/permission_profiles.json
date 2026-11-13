@@ -1,0 +1,58 @@
+{
+  "profiles": {
+    "strict_observer": {
+      "label": "Strict Observer",
+      "description": "Read-only assistance, local notes, calculations, and conversation without desktop/browser/shell execution.",
+      "grants": {
+        "local_file_access": true,
+        "project_workspace_access": true,
+        "browser_access": false,
+        "application_launching": false,
+        "development_tools": false,
+        "authorized_email_reading": false,
+        "otp_retrieval": false,
+        "approved_software_installation": false,
+        "routine_automation": false
+      }
+    },
+    "developer_autonomy": {
+      "label": "Developer Autonomy",
+      "description": "Full autonomous software development, project workspace, local files, testing, and browser research.",
+      "grants": {
+        "local_file_access": true,
+        "project_workspace_access": true,
+        "browser_access": true,
+        "application_launching": true,
+        "development_tools": true,
+        "authorized_email_reading": false,
+        "otp_retrieval": false,
+        "approved_software_installation": true,
+        "routine_automation": true
+      }
+    },
+    "autonomous_operator": {
+      "label": "Full Autonomous Operator (Recommended)",
+      "description": "Maximum authorized autonomy across desktop, browser, files, software development, and approved tools while strictly prohibiting financial/payment workflows.",
+      "grants": {
+        "local_file_access": true,
+        "project_workspace_access": true,
+        "browser_access": true,
+        "application_launching": true,
+        "development_tools": true,
+        "authorized_email_reading": true,
+        "otp_retrieval": false,
+        "approved_software_installation": true,
+        "routine_automation": true
+      }
+    }
+  },
+  "immutable_prohibitions": [
+    "payment_and_financial_transactions",
+    "unauthorized_account_access",
+    "credential_theft",
+    "security_control_disabling",
+    "destructive_operations_outside_scope",
+    "uncontrolled_private_data_disclosure",
+    "untrusted_software_execution"
+  ]
+}
