@@ -29,9 +29,20 @@ jobs:
       - name: Install Inno Setup
         shell: pwsh
         run: |
-          Invoke-WebRequest -Uri "https://jrsoftware.org/download.php/is.exe" -OutFile "$env:TEMP\is-setup.exe" -UserAgent "Mozilla/5.0"
-          Start-Process -FilePath "$env:TEMP\is-setup.exe" -ArgumentList '/SP-','/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART' -Wait
-          Remove-Item "$env:TEMP\is-setup.exe"
+          # Chocolatey is pre-installed on windows-latest GitHub Actions runners.
+          # jrsoftware.org/download.php/is.exe returns an HTML redirect page,
+          # not a direct PE executable, so direct download+execute fails with a
+          # corrupted-file error.
+          choco install innosetup --yes --no-progress
+
+          # Verify ISCC.exe is available and add its directory to GITHUB_PATH
+          # so subsequent steps (iscc installer compilation) can find it.
+          $isccPath = Get-Command ISCC.exe -ErrorAction Stop
+          $isccDir = Split-Path -Parent $isccPath.Source
+          echo "$isccDir" >> $env:GITHUB_PATH
+
+          # Verify Inno Setup compiler works
+          ISCC.exe /?
 
       - name: Run Full 30-Scenario Verification Suite on Windows
         env:
