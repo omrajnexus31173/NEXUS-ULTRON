@@ -1,0 +1,23 @@
+# Byte-compiled / caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local runtime state & sensitive user data (never commit user secrets)
+user_data/
+*.db-shm
+*.db-wal
+*.secret
+*.key
+.env
+
+# Unselected image candidates
+Unselected files/

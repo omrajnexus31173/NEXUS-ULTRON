@@ -1,0 +1,61 @@
+{
+  "app_name": "NEXUS ULTRON",
+  "tagline": "ONE MIND. INFINITE CAPABILITIES.",
+  "version": "3.0.0",
+  "mode_policy": "automatic",
+  "connectivity_check_interval_sec": 15,
+  "connectivity_flap_threshold": 2,
+  "hardware_override_tier": null,
+  "lazy_load_models": true,
+  "preload_llm_on_startup": false,
+  "max_db_size_mb": 512,
+  "temp_cleanup_age_hours": 24,
+  "voice": {
+    "enabled": true,
+    "wake_word": "hey ultron",
+    "push_to_talk_hotkey": "Ctrl+Shift+Space",
+    "tts_enabled": true,
+    "tts_rate": 185,
+    "tts_volume": 0.9,
+    "selected_microphone": "default",
+    "text_fallback": true,
+    "vad_energy_threshold": 320
+  },
+  "ai_providers": {
+    "default_offline_provider": "ultron_local_core",
+    "default_online_provider": "openai_compatible",
+    "ollama_base_url": "http://127.0.0.1:11434",
+    "ollama_model": "qwen2.5-coder:1.5b",
+    "openai_base_url": "https://api.openai.com/v1",
+    "openai_model": "gpt-4o-mini",
+    "anthropic_model": "claude-3-5-sonnet-latest",
+    "gemini_model": "gemini-2.5-flash"
+  },
+  "browser": {
+    "ultron_chrome_profile_dir": "browser_profiles/ultron_chrome_profile",
+    "nexus_browser_profile_dir": "browser_profiles/nexus_browser_profile",
+    "never_touch_user_default_chrome": true,
+    "respect_robots_and_auth": true
+  },
+  "gmail_auth": {
+    "enabled": false,
+    "otp_extraction_enabled": false,
+    "otp_max_age_seconds": 300,
+    "oauth_scopes": [
+      "https://www.googleapis.com/auth/gmail.readonly"
+    ]
+  },
+  "security": {
+    "active_permission_profile": "autonomous_operator",
+    "payment_isolation_strict": true,
+    "fail_closed_on_uncertain_payment": true,
+    "prompt_injection_shield": true,
+    "audit_logging_enabled": true
+  },
+  "ui": {
+    "theme": "obsidian_cyan",
+    "animations_enabled": true,
+    "start_minimized": false,
+    "web_companion_port": 8765
+  }
+}

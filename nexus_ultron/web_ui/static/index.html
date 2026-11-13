@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEXUS ULTRON — Autonomous Personal AI Operating System</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand-box">
+      <img src="/branding/logo_transparent_emblem.png" alt="NEXUS ULTRON Emblem" />
+      <div>
+        <div class="brand-title">NEXUS ULTRON</div>
+        <div class="brand-sub">ONE MIND. INFINITE CAPABILITIES.</div>
+      </div>
+    </div>
+
+    <button class="nav-btn active" data-screen="home">1. Home Dashboard</button>
+    <button class="nav-btn" data-screen="chat">2. AI Conversation</button>
+    <button class="nav-btn" data-screen="voice">3. Voice Assistant</button>
+    <button class="nav-btn" data-screen="tasks">4. Task Center</button>
+    <button class="nav-btn" data-screen="agents">5. Agent Center</button>
+    <button class="nav-btn" data-screen="browser">6. Browser Center</button>
+    <button class="nav-btn" data-screen="models">7. AI Model Center</button>
+    <button class="nav-btn" data-screen="memory">8. Memory Center</button>
+    <button class="nav-btn" data-screen="files">9. File Intelligence</button>
+    <button class="nav-btn" data-screen="developer">10. Developer Center</button>
+    <button class="nav-btn" data-screen="monitor">11. System Monitor</button>
+    <button class="nav-btn" data-screen="security">12. Security Center</button>
+    <button class="nav-btn" data-screen="plugins">13. Plugin Manager</button>
+    <button class="nav-btn" data-screen="settings">14. Settings &amp; Brand Kit</button>
+  </aside>
+
+  <div class="main-area">
+    <header class="topbar">
+      <div class="badges">
+        <span class="pill cyan" id="badge-mode">MODE: LOADING</span>
+        <span class="pill" id="badge-tier">HARDWARE: DETECTING</span>
+        <span class="pill green" id="badge-shield">PAYMENT ISOLATION: ARMED</span>
+      </div>
+      <button class="btn danger" id="btn-emergency" onclick="toggleEmergencyStop()">EMERGENCY STOP</button>
+    </header>
+
+    <main class="content-scroll">
+      <!-- 1. Home Dashboard -->
+      <section class="screen active" id="screen-home">
+        <div class="screen-header">
+          <h1>NEXUS ULTRON COMMAND DASHBOARD</h1>
+          <p>THINK. PLAN. EXECUTE. VERIFY. DELIVER. — Personal Intelligence, Automation &amp; Autonomous Execution System</p>
+        </div>
+        <div class="grid-4" id="home-metrics"></div>
+        <div class="card">
+          <div class="card-label">Quick Autonomous Actions</div>
+          <div class="row">
+            <button class="btn primary" onclick="switchScreen('tasks')">Launch Autonomous Objective</button>
+            <button class="btn primary" onclick="quickBuildInventory()">One-Click Demo: Build Verified Inventory App</button>
+            <button class="btn" onclick="switchScreen('chat')">Open AI Conversation</button>
+            <button class="btn" onclick="switchScreen('browser')">Open NEXUS Browser</button>
+            <button class="btn" onclick="switchScreen('security')">Inspect Security &amp; Payment Shield</button>
+            <button class="btn" onclick="switchScreen('settings')">View Brand Logo Kit &amp; Windows Installer</button>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-label">Brand Flagship Identity</div>
+            <img src="/branding/logo_primary_horizontal.png" alt="NEXUS ULTRON Primary Logo" style="width:100%;max-height:210px;object-fit:contain;border-radius:8px;" />
+          </div>
+          <div class="card">
+            <div class="card-label">Windows Installer &amp; Portable Release Deliverables</div>
+            <div id="home-releases">Loading release packages...</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-label">Recent Autonomous Activity &amp; Redacted Diagnostic Logs</div>
+          <pre class="console" id="home-logs"></pre>
+        </div>
+      </section>
+
+      <!-- 2. AI Conversation -->
+      <section class="screen" id="screen-chat">
+        <div class="screen-header">
+          <h1>AI CONVERSATION ENGINE</h1>
+          <p>Hybrid Offline Local Core &amp; Cloud Reasoning with Automatic Fallback and Persistent Memory</p>
+        </div>
+        <div class="card">
+          <pre class="console" id="chat-history" style="min-height:280px;">ULTRON READY. Ask a question, compute math (e.g. "calculate sqrt(256) * 18"), or store facts ("remember that project deadline is Friday").</pre>
+          <div class="row" style="margin-top:12px;">
+            <input class="flex-1" id="chat-input" placeholder="Send directive or question to NEXUS ULTRON..." onkeydown="if(event.key==='Enter')sendChat()" />
+            <button class="btn primary" onclick="sendChat()">Send Directive</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Voice Assistant -->
+      <section class="screen" id="screen-voice">
+        <div class="screen-header">
+          <h1>VOICE &amp; CONVERSATION ASSISTANT</h1>
+          <p>Wake-Word Detection ("Hey Ultron"), Push-to-Talk, VAD &amp; Instant Mid-Sentence Speech Interruption</p>
+        </div>
+        <div class="card">
+          <div class="row">
+            <input id="voice-wake" value="hey ultron" placeholder="Wake phrase" />
+            <input class="flex-1" id="voice-utterance" placeholder="Speak or simulate voice command: 'Hey Ultron, system status'" />
+            <button class="btn primary" onclick="runVoiceTurn()">Push-to-Talk Execute</button>
+            <button class="btn danger" onclick="interruptVoice()">Interrupt Speech Now</button>
+          </div>
+          <pre class="console" id="voice-output"></pre>
+        </div>
+      </section>
+
+      <!-- 4. Task Center -->
+      <section class="screen" id="screen-tasks">
+        <div class="screen-header">
+          <h1>AUTONOMOUS TASK &amp; MASTER PLANNING CENTER</h1>
+          <p>Explicit Task States (Pending / Planning / Running / Waiting / Failed / Completed / Cancelled) with Mandatory Verification</p>
+        </div>
+        <div class="card">
+          <div class="row">
+            <input class="flex-1" id="task-objective" placeholder="e.g. ULTRON, build me a complete inventory management application with authentication, billing, stock management, reporting and an admin dashboard." />
+            <input type="number" id="task-priority" value="8" min="1" max="10" style="width:80px;" />
+            <button class="btn primary" onclick="submitTask()">Plan, Execute &amp; Verify</button>
+          </div>
+          <div id="task-alert" style="margin-bottom:8px;color:#FFB020;font-weight:600;"></div>
+          <table>
+            <thead><tr><th>ID</th><th>State</th><th>Verified</th><th>Category</th><th>Objective &amp; Deliverable Summary</th><th>Action</th></tr></thead>
+            <tbody id="tasks-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 5. Agent Center -->
+      <section class="screen" id="screen-agents">
+        <div class="screen-header">
+          <h1>MULTI-AGENT ORCHESTRATION CENTER</h1>
+          <p>12 Specialized Built-in Agents + Unlimited Dynamic Agent Registration</p>
+        </div>
+        <div class="card">
+          <div class="row">
+            <input id="agent-id" placeholder="agent_id (e.g. perf_auditor)" />
+            <input id="agent-name" placeholder="Display Name" />
+            <input class="flex-1" id="agent-spec" placeholder="Specialty description" />
+            <button class="btn primary" onclick="registerAgent()">Register Dynamic Agent</button>
+          </div>
+          <table>
+            <thead><tr><th>Agent ID</th><th>Name</th><th>Status</th><th>Heavy Inference</th><th>Specialty</th></tr></thead>
+            <tbody id="agents-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 6. Browser Center -->
+      <section class="screen" id="screen-browser">
+        <div class="screen-header">
+          <h1>DUAL BROWSER INTELLIGENCE CENTER</h1>
+          <p>Isolated ULTRON Chrome Profile (Personal Chrome Untouched) + Dedicated NEXUS Browser with Multi-Layer Payment Shield</p>
+        </div>
+        <div class="card" id="chrome-iso-card"></div>
+        <div class="card">
+          <div class="row">
+            <select id="browser-profile">
+              <option value="default">Profile: default</option>
+              <option value="research">Profile: research</option>
+              <option value="automation">Profile: automation</option>
+            </select>
+            <input class="flex-1" id="browser-url" value="https://docs.python.org/3/" placeholder="Enter URL, platform key (chatgpt/github), or search query..." />
+            <button class="btn primary" onclick="navigateBrowser()">Open Tab / Navigate</button>
+            <button class="btn danger" onclick="testBlockedPaymentUrl()">Test Payment Shield (Stripe Checkout)</button>
+          </div>
+          <pre class="console" id="browser-output"></pre>
+        </div>
+      </section>
+
+      <!-- 7. AI Model Center -->
+      <section class="screen" id="screen-models">
+        <div class="screen-header">
+          <h1>AI MODEL &amp; ENCRYPTED CREDENTIAL VAULT CENTER</h1>
+          <p>Zero Startup Model Preload — On-Demand Local Inference &amp; Encrypted Cloud Provider Keys</p>
+        </div>
+        <div class="card">
+          <div class="row">
+            <select id="vault-key-name">
+              <option value="OPENAI_API_KEY">OPENAI_API_KEY</option>
+              <option value="ANTHROPIC_API_KEY">ANTHROPIC_API_KEY</option>
+              <option value="GEMINI_API_KEY">GEMINI_API_KEY</option>
+              <option value="OPENROUTER_API_KEY">OPENROUTER_API_KEY</option>
+            </select>
+            <input type="password" class="flex-1" id="vault-secret-val" placeholder="Store API key in Windows Credential Manager + AES-Fernet Vault..." />
+            <button class="btn primary" onclick="saveVaultKey()">Save to Secure Vault</button>
+          </div>
+          <table>
+            <thead><tr><th>Provider ID</th><th>Engine</th><th>Mode</th><th>Configured</th><th>RAM Profile</th></tr></thead>
+            <tbody id="models-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 8. Memory Center -->
+      <section class="screen" id="screen-memory">
+        <div class="screen-header">
+          <h1>PERSISTENT LOCAL MEMORY &amp; KNOWLEDGE SYSTEM</h1>
+          <p>Separated Namespaces, SQLite FTS5 + Semantic Retrieval &amp; Automatic Credential/Card Blocking</p>
+        </div>
+        <div class="card">
+          <div class="row">
+            <select id="mem-ns">
+              <option value="long_term">long_term</option>
+              <option value="knowledge">knowledge</option>
+              <option value="project">project</option>
+              <option value="instruction">instruction</option>
+              <option value="temporary">temporary</option>
+            </select>
+            <input id="mem-title" placeholder="Title" />
+            <input class="flex-1" id="mem-content" placeholder="Memory content (passwords/cards automatically blocked)" />
+            <button class="btn primary" onclick="addMemory()">Save Memory</button>
+          </div>
+          <div class="row">
+            <input class="flex-1" id="mem-search" placeholder="Search FTS5 + Local Semantic Vectors..." />
+            <button class="btn" onclick="loadMemory()">Search</button>
+          </div>
+          <table>
+            <thead><tr><th>ID</th><th>Namespace</th><th>Title</th><th>Content</th><th>Action</th></tr></thead>
+            <tbody id="memory-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 9. File Intelligence -->
+      <section class="screen" id="screen-files">
+        <div class="screen-header">
+          <h1>FILE, PDF, DOCX, SPREADSHEET &amp; CALCULATOR INTELLIGENCE</h1>
+          <p>100% Offline Local File Search, Document Extraction &amp; Safe AST Scientific Calculator</p>
+        </div>
+        <div class="card">
+          <div class="row">
+            <input id="file-glob" value="*.md" placeholder="Glob pattern (e.g. *.py, *.md)" />
+            <input class="flex-1" id="file-query" placeholder="Optional content substring filter..." />
+            <button class="btn primary" onclick="searchFiles()">Search Workspace Files</button>
+          </div>
+          <div class="row">
+            <input class="flex-1" id="calc-expr" value="sqrt(1024) * 15 + mean([100, 200, 300])" />
+            <button class="btn" onclick="evalCalc()">Calculate Offline</button>
+          </div>
+          <pre class="console" id="files-output"></pre>
+        </div>
+      </section>
+
+      <!-- 10. Developer Center -->
+      <section class="screen" id="screen-developer">
+        <div class="screen-header">
+          <h1>COMPLETE AUTONOMOUS SOFTWARE DEVELOPMENT ENGINE</h1>
+          <p>Isolated Workspaces, Multi-Language Codegen (Python / JS / C / C++), Automated Testing, Self-Debugging &amp; ZIP Packaging</p>
+        </div>
+        <div class="card">
+          <div class="row">
+            <input class="flex-1" id="dev-spec" value="Complete inventory management application with authentication, billing, stock management, reporting and an admin dashboard" />
+            <select id="dev-lang">
+              <option value="python">Python Full-Stack</option>
+              <option value="javascript">JavaScript (Node.js)</option>
+              <option value="c">C (ISO C11)</option>
+              <option value="cpp">C++ (ISO C++17)</option>
+            </select>
+            <button class="btn primary" onclick="buildSoftware()">Build, Test, Verify &amp; Package</button>
+          </div>
+          <pre class="console" id="dev-output">Ready to generate and verify runnable software.</pre>
+          <table>
+            <thead><tr><th>Project</th><th>Language</th><th>Verified</th><th>Framework</th><th>Isolated Workspace</th></tr></thead>
+            <tbody id="dev-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 11. System Monitor -->
+      <section class="screen" id="screen-monitor">
+        <div class="screen-header">
+          <h1>SYSTEM MONITOR &amp; ADAPTIVE RESOURCE MANAGER</h1>
+          <p>8 GB Baseline Target Optimization, Hardware Auto-Tiering &amp; Process Telemetry</p>
+        </div>
+        <div class="card">
+          <pre class="console" id="monitor-snapshot"></pre>
+          <table>
+            <thead><tr><th>PID</th><th>Process</th><th>CPU %</th><th>RAM (MB)</th><th>Status</th></tr></thead>
+            <tbody id="monitor-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 12. Security Center -->
+      <section class="screen" id="screen-security">
+        <div class="screen-header">
+          <h1>SECURITY, AUTONOMY PERMISSIONS &amp; PAYMENT ISOLATION ENGINE</h1>
+          <p>Persistent Permission Profiles, Instant Revocation, SHA-256 Hash-Chained Audit Log &amp; Fail-Closed Financial Shield</p>
+        </div>
+        <div class="card">
+          <div class="row">
+            <button class="btn primary" onclick="applyProfile('autonomous_operator')">Profile: Full Autonomous Operator</button>
+            <button class="btn" onclick="applyProfile('developer_autonomy')">Profile: Developer Autonomy</button>
+            <button class="btn" onclick="applyProfile('strict_observer')">Profile: Strict Observer</button>
+            <button class="btn" onclick="releasePaymentLock()">Release Payment Lockdown</button>
+            <button class="btn danger" onclick="revokeAllPermissions()">Revoke All Permissions Now</button>
+          </div>
+          <div id="security-summary" style="margin:10px 0;font-weight:700;color:#00E599;"></div>
+          <table>
+            <thead><tr><th>Timestamp</th><th>Event</th><th>Category</th><th>Decision</th><th>Redacted Details</th></tr></thead>
+            <tbody id="audit-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 13. Plugin Manager -->
+      <section class="screen" id="screen-plugins">
+        <div class="screen-header">
+          <h1>EXTENSIBLE PLUGIN &amp; SKILLS ARCHITECTURE</h1>
+          <p>Modular Skills with Permission Validation, Enable/Disable Controls &amp; Isolated Error Boundaries</p>
+        </div>
+        <div class="card">
+          <table>
+            <thead><tr><th>Skill ID</th><th>Name</th><th>Version</th><th>Enabled</th><th>Description</th><th>Actions</th></tr></thead>
+            <tbody id="plugins-tbody"></tbody>
+          </table>
+          <pre class="console" id="plugin-output" style="margin-top:12px;">Click "Run Skill" on any plugin above to inspect its isolated execution output.</pre>
+        </div>
+      </section>
+
+      <!-- 14. Settings & Brand Kit -->
+      <section class="screen" id="screen-settings">
+        <div class="screen-header">
+          <h1>SETTINGS, HYBRID MODE POLICY &amp; OFFICIAL BRAND IDENTITY KIT</h1>
+          <p>Mode Switching (Automatic / Manual Offline / Manual Online), PySide6 Desktop Preview &amp; All 5 Brand Logo Variations</p>
+        </div>
+        <div class="card">
+          <div class="card-label">Intelligent Hybrid Mode Switching</div>
+          <div class="row">
+            <button class="btn primary" onclick="setModePolicy('automatic')">Automatic Mode</button>
+            <button class="btn" onclick="setModePolicy('manual_offline')">Manual Offline Mode</button>
+            <button class="btn" onclick="setModePolicy('manual_online')">Manual Online Mode</button>
+          </div>
+          <pre class="console" id="settings-output"></pre>
+        </div>
+        <div class="card">
+          <div class="card-label">NEXUS ULTRON Official Brand Identity Variations &amp; Native PySide6 Desktop Render</div>
+          <div class="brand-gallery" id="brand-gallery"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

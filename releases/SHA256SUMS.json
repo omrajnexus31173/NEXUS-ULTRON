@@ -1,0 +1,19 @@
+{
+  "product": "NEXUS ULTRON",
+  "version": "3.0.0",
+  "built_at": "2026-11-13T10:05:38.071549+00:00",
+  "artifacts": {
+    "NEXUS-ULTRON-v3.0.0-Brand-Identity-Kit.zip": {
+      "size_bytes": 4492642,
+      "sha256": "c57aeb27adba88940f4221306b8fd32a0f628670545125a00d9fd4cf8e724a1b"
+    },
+    "NEXUS-ULTRON-v3.0.0-Windows10-x64-Installer.zip": {
+      "size_bytes": 4656479,
+      "sha256": "b75e33b0cf80e624063a5d93d1b1e974536c9278d41bf777706c07afd7193af2"
+    },
+    "NEXUS-ULTRON-v3.0.0-Windows10-x64-Portable.zip": {
+      "size_bytes": 4630536,
+      "sha256": "6c54ede2c5ce3f5f60401faae89bc33279ae48bded411d2bc458172d3905acba"
+    }
+  }
+}
